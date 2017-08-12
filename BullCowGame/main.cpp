@@ -9,6 +9,7 @@
 #include <iostream>
 
 bool isogramCheck(char myword[]);
+bool bullCheck(std::string myword);
 
 
 int main(int argc, const char * argv[]) {
