@@ -18,9 +18,11 @@ bool winCheck(std::string goalWord, std::string guess);
 
 int main(int argc, const char * argv[]) {
     int choice;
+    std::string garbage;
     
     do{
         std::cout   << "Welcome to Bulls and Cows.\n"
+                    << "Can you guess the isogram I've got in my head?\n"
                     << "Please make a selection: \n"
                     << "1.\t Play Bulls and Cows\n"
                     << "2.\t Explain the Rules\n"
@@ -31,6 +33,7 @@ int main(int argc, const char * argv[]) {
         switch(choice){
             case 1:
                 //initialize game
+                std::getline(std::cin,garbage);
                 init();
                 break;
             case 2:
@@ -60,8 +63,10 @@ void init(){
     int attempts = 10;
     
     while(attempts > 0){
-        std::cout << "Guess a " << goalWord.length() << " letter word." << std::endl;
-        std::cin >> guessWord;
+        std::cout << "\nGuess a " << goalWord.length() << " letter word.\n";
+        std::cout << "You have " << attempts-- << " remaining attempts.\n";
+        std::getline(std::cin,guessWord);
+        std::cout << "You guessed: " << guessWord << std::endl;
         if(isValid(goalWord, guessWord)){
             bulls = bullCheck(goalWord, guessWord);
             cows = cowCheck(goalWord, guessWord);
@@ -75,8 +80,6 @@ void init(){
         }else{
             std::cout << "Make sure you enter a valid word.\n";
         }
-        std::cout << "You have " << --attempts << " remaining.\n\n";
-        
     }//end while
     if(attempts==0){
         std::cout << "You have 0 attempts left. YOU LOSE!\n\n";
