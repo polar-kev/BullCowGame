@@ -30,6 +30,8 @@ class FBullCowGame
     int32 attempts;
     bool bIsIsogram(FString);
     bool bWin;
+    bool bIsLowerCase(FString);
+    bool bHasNumber(FString);
     EWordStatus isValid(FString);
     
 public:

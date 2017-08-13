@@ -24,11 +24,12 @@ FBullCowGame mygame;
 //TODO Add more word game types in addition to isograms
 int main(int32 argc, const char * argv[]) {
     FText choice;
-    int32 i_choice;
+    int32 i_choice = 5;//default choice in case of bad input from user
     
     do{
         printIntroText();
         std::getline(std::cin,choice);
+        //TODO check input from user
         i_choice = stoi(choice);
         switch(i_choice){
             case 1:
@@ -43,6 +44,7 @@ int main(int32 argc, const char * argv[]) {
             case 4:
                 std::cout << "Quitting Bulls and Cows";
                 return 0;
+            case 5:
             default:
                 break;
         }

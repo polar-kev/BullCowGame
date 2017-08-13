@@ -70,6 +70,12 @@ void FBullCowGame::setGuess(){
             case EWordStatus::NOT_ISOGRAM :
                 std::cout << "Please enter a valid isogram.\n";
                 break;
+            case EWordStatus::NOT_LOWERCASE :
+                std::cout << "Please make sure all the letters are lowercase.\n";
+                break;
+            case EWordStatus::NUMBERS :
+                std::cout << "Please make sure your word had no numbers.\n";
+                break;
             default:
                 break;
         }
@@ -86,18 +92,30 @@ EWordStatus FBullCowGame::isValid(FString newWord){
     }
     else if(goalWord.length() != newWord.length()){
         return EWordStatus::WRONG_LENGTH;
-    }else if(false){
-       //check lowercase
-        return EWordStatus::NOT_LOWERCASE;
-    }else if(false){
-        //check for numbers
+    }else if(bHasNumber(newWord)){
         return EWordStatus::NUMBERS;
+    }else if(!bIsLowerCase(newWord)){
+        return EWordStatus::NOT_LOWERCASE;
     }else{
        return EWordStatus::OK;
     }
 }
 
 bool FBullCowGame::bIsIsogram(FString newWord){
+    //treat 0 and 1 letter words as isograms
+    if(newWord.length()<=1){return true;}
+    
+    TMap<char,bool> letterSeen;
+    for(auto Letter : newWord){
+        Letter = tolower(Letter);//only want to work with lowercase letters
+        if(letterSeen[Letter] == true){//if the letter is in the map
+            return false;//We do not have an isogram
+        } else{
+            letterSeen[Letter]=true;
+        }
+    }
+    
+    /*Old implementation
     //isogram = a word where each letter only appears once
     for(int32 i=0;i<newWord.length();i++){
         for(int32 j=0;j<newWord.length();j++){
@@ -108,6 +126,27 @@ bool FBullCowGame::bIsIsogram(FString newWord){
         }
     }
     return true;
+     */
+    
+    return true;//for example in cases where /0 is entered
+}
+
+bool FBullCowGame::bIsLowerCase(FString word){
+    for(auto letter : word){
+        if(!isalpha(letter) || !islower(letter)){
+            return false;
+        }
+    }
+    return true;
+}
+
+bool FBullCowGame::bHasNumber(FString word){
+    for(auto letter : word){
+        if(isdigit(letter)){
+            return true;
+        }
+    }
+    return false;
 }
 
 void FBullCowGame::printGameSummary(){
