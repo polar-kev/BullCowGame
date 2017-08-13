@@ -12,12 +12,16 @@
 using namespace std;
 
 BullCowGame::BullCowGame(){
-    goalWord = "clown";
-    guessWord = "";
-    attempts = 10;
+    reset();
 }
 
-int BullCowGame::getBulls(){
+void BullCowGame::reset(){
+    goalWord = "clown";
+    guessWord = "";
+    attempts = 5;
+}
+
+int BullCowGame::getBulls() const {
     //Bull- letters in the guess word are in the same index position as the goal word
     int count = 0;
     for(int i=0;i<goalWord.length();i++){
@@ -28,7 +32,7 @@ int BullCowGame::getBulls(){
     return count;
 }
 
-int BullCowGame::getCows(){
+int BullCowGame::getCows() const {
     //cow- a letter in the guess word can also be found in the goal word but the letters are not in the same index position
     int count = 0;
     for(int i=0;i<=5;i++){
@@ -55,6 +59,7 @@ void BullCowGame::setGuess(){
         std::getline(std::cin,newWord);
     }
     guessWord=newWord;
+    attempts-=1;
 }
 
 bool BullCowGame::isValid(std::string newWord){
@@ -77,23 +82,11 @@ bool BullCowGame::isIsogram(std::string newWord){
     return true;
 }
 
-bool BullCowGame::winCheck(){
-    return(goalWord == guessWord);
-}
+bool BullCowGame::winCheck() const {return goalWord==guessWord;}
 
-void BullCowGame::decreaseAttempts(){
-    if(attempts>0)
-        attempts-= 1;
-}
 
-std::string BullCowGame::getGoalWord(){
-    return goalWord;
-}
+std::string BullCowGame::getGoalWord() const {return goalWord;}
 
-std::string BullCowGame::getGuessWord(){
-    return guessWord;
-}
+std::string BullCowGame::getGuessWord() const {return guessWord;}
 
-int BullCowGame::getAttempts(){
-    return attempts;
-}
+int BullCowGame::getAttempts() const {return attempts;}

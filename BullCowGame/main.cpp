@@ -13,17 +13,19 @@
 void play();
 void printIntroText();
 
+BullCowGame mygame;
 
+//TODO find a way to fix cin/getline() input buffer problem
 int main(int argc, const char * argv[]) {
-    int choice;
+    std::string choice;
+    int i_choice;
     
     do{
         printIntroText();
-        std::cin >> choice;
-        switch(choice){
+        std::getline(std::cin,choice);
+        i_choice = stoi(choice);
+        switch(i_choice){
             case 1:
-                //play game
-                std::cin.ignore(256, '\n');//input buffer maintenance
                 play();
                 break;
             case 2:
@@ -38,19 +40,18 @@ int main(int argc, const char * argv[]) {
             default:
                 break;
         }
-    }while(choice != 4);
+    }while(i_choice != 4);
 }//end of main
 
 
-//initialize the game
+
 void play(){
-    BullCowGame mygame;
+    mygame.reset();
     int bulls,cows;
     
     while(mygame.getAttempts() > 0){
         std::cout   << "\nGuess a " << mygame.getGoalWord().length() << " letter word.\n"
                     << "You have " << mygame.getAttempts() << " remaining attempts.\n";
-        mygame.decreaseAttempts();
         mygame.setGuess();
         std::cout << "You guessed: " << mygame.getGuessWord() << std::endl;
         
@@ -62,12 +63,10 @@ void play(){
     
         if(mygame.winCheck()){
             std::cout << "You win! The word was " << mygame.getGoalWord() << "!" << std::endl << std::endl;
-            break;
+            return;
         }
     }//end while
-    if(mygame.getAttempts()==0){
-        std::cout << "You have 0 attempts left. YOU LOSE!\n\n";
-    }
+    std::cout << "You have 0 attempts left. YOU LOSE!\n\n";
 }//end of play()
 
 

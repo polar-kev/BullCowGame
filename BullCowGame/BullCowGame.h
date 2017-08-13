@@ -8,6 +8,7 @@
 
 #ifndef BullCowGame_h
 #define BullCowGame_h
+#include <string>
 
 class BullCowGame
 {
@@ -20,14 +21,14 @@ class BullCowGame
     
 public:
     BullCowGame();
-    void decreaseAttempts();
-    int getBulls();
-    int getCows();
-    int getAttempts();
-    bool winCheck();
+    void reset();
+    int getBulls() const;
+    int getCows() const;
+    int getAttempts() const;
+    bool winCheck() const;
     void setGuess();
-    std::string getGoalWord();
-    std::string getGuessWord();
+    std::string getGoalWord() const;
+    std::string getGuessWord() const;
 };
 
 #endif /* BullCowGame_h */
