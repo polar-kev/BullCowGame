@@ -1,33 +1,41 @@
-//
-//  FBullCowGame.cpp
-//  BullCowGame
-//
-//  Created by Kevin Semple on 2017-08-12.
-//  Copyright © 2017 ksemp. All rights reserved.
-//
+/*
+ Game class Implementation of the game Bulls and Cows,
+ based on the popular Mastermind boardgame.
+ Changes to syntax were made to make this code compatible with the Unreal Engine
+ 
+ Kevin Semple - 2017
+ 
+*/
 
 //#include <stdio.h>
 #include <iostream>
 #include "FBullCowGame.h"
 #include <map>
-#define TMap std::map
+#define TMap std::map //Used for Unreal Engine compatibility
 
-using FString = std::string;//Needed for use with Unreal Engine. FString is mutable.
-using int32 = int;//Needed for use with Unreal Engine. Allows mult-platform deployment.
+//Used for Unreal Engine compatibility
+using FString = std::string;
+using int32 = int;
 
 FBullCowGame::FBullCowGame(){
+    gamestyle = EGamestyle::PALINDROME;//
     reset();
 }
 
 void FBullCowGame::reset(){
-    goalWord = "but";
+    if(gamestyle == EGamestyle::ISOGRAM){
+        goalWord = "bonus";//support for hardcoded words length 3-7 letters
+    }else{
+        goalWord = "kayak";
+    }
+    
     guessWord = "";
-    attempts = 5;
-    bWin = false;
+    attempts = getAttempts();
+    bWin = bWinCheck();
 }
 
+//Bull: letter in the guessed word is in the same position as in the hidden word
 int32 FBullCowGame::getBulls() const {
-    //Bull- letters in the guess word are in the same index position as the goal word
     int32 count = 0;
     for(int32 i=0;i<goalWord.length();i++){
         if(goalWord[i] == guessWord[i]){
@@ -37,8 +45,8 @@ int32 FBullCowGame::getBulls() const {
     return count;
 }
 
+//Cow: letter in the guessed word is in a different position in the hidden word
 int32 FBullCowGame::getCows() const {
-    //cow- a letter in the guess word can also be found in the goal word but the letters are not in the same index position
     int32 count = 0;
     for(int32 i=0;i<goalWord.length();i++){
         for(int32 j=0;j<goalWord.length();j++){
@@ -53,12 +61,10 @@ int32 FBullCowGame::getCows() const {
     return count;
 }
 
-void FBullCowGame::setGuess(){
-    //Ensures validity of guess and decreases attempts
+//Takes input from player and does not proceed with game logic until valid input is received
+void FBullCowGame::inputGuess(){
     FString newWord;
     EWordStatus status = EWordStatus::INVALID_STATUS;
-    
-    std::cout << "Please guess a word.\n";
     
     do{
         std::getline(std::cin,newWord);
@@ -68,13 +74,16 @@ void FBullCowGame::setGuess(){
                 std::cout << "Please enter a " << getGoalWordLength() << " letter word.\n";
                 break;
             case EWordStatus::NOT_ISOGRAM :
-                std::cout << "Please enter a valid isogram.\n";
+                std::cout << "Please enter a word with no repeated letters.\n";
                 break;
             case EWordStatus::NOT_LOWERCASE :
                 std::cout << "Please make sure all the letters are lowercase.\n";
                 break;
             case EWordStatus::NUMBERS :
-                std::cout << "Please make sure your word had no numbers.\n";
+                std::cout << "Please make sure your word has no numbers.\n";
+                break;
+            case EWordStatus::NOT_PALINDROME :
+                std::cout << "Please make sure your word is a palindrome.\n";
                 break;
             default:
                 break;
@@ -82,26 +91,32 @@ void FBullCowGame::setGuess(){
     }while(status != EWordStatus::OK);
     
     guessWord=newWord;
-    bWin = (guessWord==goalWord);
+    bWin = bWinCheck();//win condition
     attempts-=1;
 }
 
+//Verify that user input is valid
 EWordStatus FBullCowGame::isValid(FString newWord){
-    if(!bIsIsogram(newWord)){
-        return EWordStatus::NOT_ISOGRAM;
-    }
-    else if(goalWord.length() != newWord.length()){
-        return EWordStatus::WRONG_LENGTH;
-    }else if(bHasNumber(newWord)){
+    if(bHasNumber(newWord)){
         return EWordStatus::NUMBERS;
+    }else if(goalWord.length() != newWord.length()){
+        return EWordStatus::WRONG_LENGTH;
+    }else if((gamestyle == EGamestyle::ISOGRAM) && !bIsIsogram(newWord)){
+        return EWordStatus::NOT_ISOGRAM;
+    }else if((gamestyle == EGamestyle::PALINDROME) && !bIsPalindrome(newWord)){
+        return EWordStatus::NOT_PALINDROME;
     }else if(!bIsLowerCase(newWord)){
         return EWordStatus::NOT_LOWERCASE;
-    }else{
-       return EWordStatus::OK;
     }
+    else{
+        return EWordStatus::OK;
+    }
+    
 }
 
-bool FBullCowGame::bIsIsogram(FString newWord){
+//Isogram- a word where every letter only appears once in the word
+//Algorithm improved from O(n^2) to O(n) using hash map
+bool FBullCowGame::bIsIsogram(FString newWord) const{
     //treat 0 and 1 letter words as isograms
     if(newWord.length()<=1){return true;}
     
@@ -131,16 +146,29 @@ bool FBullCowGame::bIsIsogram(FString newWord){
     return true;//for example in cases where /0 is entered
 }
 
-bool FBullCowGame::bIsLowerCase(FString word){
-    for(auto letter : word){
-        if(!isalpha(letter) || !islower(letter)){
+bool FBullCowGame::bIsPalindrome (FString word) const{
+    int maxchars = (uint32_t)word.length();
+    if(maxchars<=1){return true;}
+    int middle = (maxchars-1)/2;
+    if(maxchars%2 != 0){middle--;}//if odd number of chars, middle letter will be unique
+    for(int i=0;i<=middle;i++){
+        if(!(word[i] == word[maxchars-1-i])){//if the letters don't match counting out from the middle
             return false;
         }
     }
     return true;
 }
 
-bool FBullCowGame::bHasNumber(FString word){
+bool FBullCowGame::bIsLowerCase(FString word) const{
+    for(auto letter : word){
+        if(!islower(letter)){
+            return false;
+        }
+    }
+    return true;
+}
+
+bool FBullCowGame::bHasNumber(FString word) const{
     for(auto letter : word){
         if(isdigit(letter)){
             return true;
@@ -151,16 +179,31 @@ bool FBullCowGame::bHasNumber(FString word){
 
 void FBullCowGame::printGameSummary(){
     if(bWinCheck()){
-        std::cout << "YOU WIN!" << std::endl << "The word was " << getGuessWord() << "!" << std::endl << std::endl;
+        std::cout << "\nYOU WIN!" << std::endl << "The word was " << getGuessWord() << "!" << std::endl << std::endl;
     }else{
-        std::cout << "YOU LOSE!\n\n";
+        std::cout << "\nYOU LOSE!\n\n";
     }
 }
 
-bool FBullCowGame::bWinCheck() const {return bWin;}
+void FBullCowGame::setGamestyle(){
+    if(gamestyle == EGamestyle::ISOGRAM){
+        gamestyle = EGamestyle::PALINDROME;
+        std::cout << "Game style set to Palindromes!\n\n";
+    }else{
+        gamestyle = EGamestyle::ISOGRAM;
+        std::cout << "Game style set to Isograms!\n\n";
+    }
+}
 
-int32 FBullCowGame::getGoalWordLength() const {return (uint32_t)goalWord.length();}//word length is unlikely to be too large for int data type
+//Win condition- the player guessed the right word
+bool FBullCowGame::bWinCheck() const {return (guessWord==goalWord);}
+
+int32 FBullCowGame::getGoalWordLength() const {return (uint32_t)goalWord.length();}//Word length is very unlikely to be too large for 'int' data type.
 
 FString FBullCowGame::getGuessWord() const {return guessWord;}
 
-int32 FBullCowGame::getAttempts() const {return attempts;}
+//Generate numbere of guess attempts based on word length
+int32 FBullCowGame::getAttempts() const {
+    TMap<int32,int32>WordLengthToAttemps {{3,3},{4,5},{5,5},{6,10},{7,15}};
+    return WordLengthToAttemps[getGoalWordLength()];
+}

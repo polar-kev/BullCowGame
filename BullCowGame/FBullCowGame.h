@@ -1,26 +1,32 @@
-//
-//  FBullCowGame.h
-//  BullCowGame
-//
-//  Created by Kevin Semple on 2017-08-12.
-//  Copyright © 2017 ksemp. All rights reserved.
-//
+/*
+ Bulls and Cows game Class declarations
+ Changes to syntax were made to make this code compatible with the Unreal Engine
+ 
+ Kevin Semple - 2017
+*/
 
 #ifndef FBullCowGame_h
 #define FBullCowGame_h
 #include <string>
 
-using FString = std::string;//Needed for use with Unreal Engine. FString is mutable.
-using int32 = int;//Needed for use with Unreal Engine. Allows mult-platform deployment.
+//Used for Unreal Engine compatibility
+using FString = std::string;
+using int32 = int;
 
 enum class EWordStatus {
     INVALID_STATUS,
     OK,
     NOT_ISOGRAM,
+    NOT_PALINDROME,
     NOT_LOWERCASE,
     NUMBERS,
     WRONG_LENGTH,
     
+};
+
+enum class EGamestyle {
+    ISOGRAM,
+    PALINDROME,
 };
 
 class FBullCowGame
@@ -28,17 +34,21 @@ class FBullCowGame
     FString goalWord;
     FString guessWord;
     int32 attempts;
-    bool bIsIsogram(FString);
+    bool bIsIsogram (FString) const;
+    bool bIsPalindrome (FString) const;
     bool bWin;
-    bool bIsLowerCase(FString);
-    bool bHasNumber(FString);
+    bool bIsLowerCase (FString) const;
+    bool bHasNumber (FString) const;
     EWordStatus isValid(FString);
+    EGamestyle gamestyle;
+    
     
 public:
     FBullCowGame();
     void reset();
-    void setGuess();
+    void inputGuess();
     void printGameSummary();
+    void setGamestyle();
     bool bWinCheck() const;
     int32 getBulls() const;
     int32 getCows() const;
